@@ -1,0 +1,53 @@
+az login
+
+#variables
+storage=storageaksfile11
+rg=storage
+local=eastus2
+fileshare=aksshare
+aks=aks-deployment
+sku=Standard_B2s
+
+#resource group
+az group create -n $rg -l $local
+
+#Storage Account
+az storage account create -n $storage -g $rg -l $local --sku Standard_LRS
+
+#Obter connection string do Storage Account
+connstring=$(az storage account show-connection-string -n $storage -g $rg -o tsv)
+
+#Criar file Share
+az storage share create -n $fileshare --connection-string $connstring
+
+#Obter chave do storage
+key=$(az storage account keys list -g $rg --account-name $storage --query "[0].value" -o tsv)
+
+#provisioning cluster
+az aks create -g $rg -n $aks --node-count 1 --node-vm-size $sku
+
+az aks get-credentials -g $rg -n $aks
+
+#Criar segredo
+kubectl create secret generic azure-secret --from-literal=azurestorageaccountname=$storage --from-literal=azurestorageaccountkey=$key
+
+#Listar Secrets
+kubectl get secrets
+
+#Listar Storage Class
+kubectl get storageclass
+
+#Criar Storage Class
+cd pvc
+kubectl apply -f sv-fileshare.yaml
+kubectl apply -f pvc-fileshare.yaml
+
+kubectl apply -f pod-fileshare.yaml
+
+# lista arqquivo do volume
+kubectl exec pod-pvc --container pod-pvc -- sh -c "ls /mnt/azure"
+
+az aks delete -g $rg -n $aks
+
+#Delete Resource Group
+az group delete -n $rg
