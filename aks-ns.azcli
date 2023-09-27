@@ -1,0 +1,38 @@
+az login
+
+#variables
+rg=rg-aks-cli
+local=eastus
+aks=aks-cli
+sku=Standard_B2s
+
+#resource group
+az group create -n $rg -l $local
+
+#provisioning cluster
+az aks create -g $rg -n $aks --node-count 1 --node-vm-size $sku
+
+az aks get-credentials -g $rg -n $aks
+
+#Delete AKS
+az aks delete -g $rg -n $aks
+
+#Delete Resource Group
+az group delete -n $rg
+
+#
+kubectl version -o yaml
+kubectl cluster-info
+kubectl get all
+kubectl get all --all-namespaces
+
+kubectl get po
+
+kubectl get namespaces
+kubectl get ns
+kubectl get pods --namespaces kube-system
+kubectl get pods -n kube-system
+
+kubectl create ns development
+kubectl describe ns development
+kubectl delete ns development
