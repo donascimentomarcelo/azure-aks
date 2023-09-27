@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-blog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wordpress-blog
+  template:
+    metadata:
+      labels:
+        app: wordpress-blog
+    spec:
+      containers:
+        - name: wordpress-blog
+          image: containersecret.azurecr.io/blog:v1
+          volumeMounts:
+            - name: keyvault-volume
+              mountPath: /var/keyvault
+              readOnly: true
+          ports:
+          - containerPort: 80
+          env:
+          - name: DATABASE_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: host
+                name: mysql-config
+          - name: DATABASE_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                key: user
+                name: mysql-config
+          - name: DATABASE_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: database
+                name: mysql-config
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: database
+                name: mysql-password
+          resources:
+            limits:
+              cpu: 500m
+              memory: 128Mi
+      volumes:
+        - name: keyvault-volume
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: azure-keyvault
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - wordpress-blog
+            topologyKey: kubernetes.io/hostname
+

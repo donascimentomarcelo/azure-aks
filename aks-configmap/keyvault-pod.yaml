@@ -1,0 +1,28 @@
+kind: Pod
+apiVersion: v1
+metadata:
+  name: keyvault-secret-pod
+  labels:
+    name: keyvault-secret-pod
+spec:
+  containers:
+  - name: keyvault-secret-pod
+    image: busybox
+    command: ['sh', '-c', 'while true; do echo "Password: $(cat /var/keyvault/mysql-password)"; sleep 10; done']
+    resources:
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+    volumeMounts:
+    - name: keyvault-volume
+      mountPath: "/var/keyvault"
+      readOnly: true
+    ports:
+      - containerPort: 3306
+  volumes: 
+    - name: keyvault-volume
+      csi: 
+        driver: secrets-store.csi.k8s.io
+        readOnly: true
+        volumeAttributes:
+          secretProviderClass: "azure-keyvault"

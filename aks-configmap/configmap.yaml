@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-config
+data:
+  host: mysqlconfigmapsecret.mysql.database.azure.com
+  user: crane
+  database: wordpress

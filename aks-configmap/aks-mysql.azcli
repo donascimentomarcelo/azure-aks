@@ -1,0 +1,70 @@
+az login
+az account set --subscription 3a74942a-c393-470e-9055-49412c6a5001
+az aks get-credentials --resource-group rg-configmap-secret --name aksconfigmapsecret
+az mysql db create -g rg-configmap-secret -s aksmysql10 -n wordpress
+
+# cria config map
+kubectl apply -f ./aks-configmap/configmap.yaml
+
+kubectl get configmaps
+
+kubectl describe configmaps mysql-config
+
+# cria pod
+kubectl apply -f ./aks-configmap/configmap-pod.yaml
+
+# cria volume
+kubectl apply -f ./aks-configmap/configmap-volume-pod.yaml
+
+# cria secret
+kubectl apply -f ./aks-configmap/secret.yaml
+
+# cria secret password
+kubectl apply -f ./aks-configmap/secret-pod.yaml
+
+# cria secret password com volume
+kubectl apply -f ./aks-configmap/secret-volume-pod.yaml
+
+# cria job
+kubectl apply -f ./aks-configmap/mysql-job.yaml
+
+# listar job
+kubectl get jobs
+
+kubectl describe job mysql-client-job
+
+# cria cronjob
+kubectl apply -f ./aks-configmap/mysql-cronjob.yaml
+
+# listar cronjob
+kubectl get cronjobs
+
+# cria secret provider class
+kubectl apply -f ./aks-configmap/secret-providerclass.yaml
+
+# listar secretes
+kubectl get crds
+
+# cria secret provider class
+kubectl apply -f ./aks-configmap/keyvault-pod.yaml
+
+kubectl get pods
+
+kubectl describe pod keyvault-secret-pod
+kubectl logs keyvault-secret-pod
+
+# Login no ACR
+az acr login --name containersecret
+
+# Anexar ACR ao AKS
+az aks update --resource-group rg-configmap-secret --name aksconfigmapsecret --attach-acr containersecret
+
+# Docker
+docker build -t blog:v1 .
+
+docker tag blog:v1 containersecret.azurecr.io/blog:v1
+
+docker push containersecret.azurecr.io/blog:v1
+
+# Deployment wordpress
+kubectl apply -f ./aks-configmap/wordpress-deployment.yaml
