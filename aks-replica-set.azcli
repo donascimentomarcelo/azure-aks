@@ -1,0 +1,64 @@
+az login
+
+#variables
+rg=deploy
+local=eastus2
+aks=aks-deployment
+sku=Standard_B2s
+
+#resource group
+az group create -n $rg -l $local
+
+#provisioning cluster
+az aks create -g $rg -n $aks --node-count 1 --node-vm-size $sku
+
+az aks get-credentials -g $rg -n $aks
+
+kubectl get replicasets
+kubectl get rs --all-namespaces
+
+#Create replicaset
+kubectl apply -f ./deployment-svc/replicaset.yaml
+kubectl get po
+
+#Delete AKS
+az aks delete -g $rg -n $aks
+
+#Delete Resource Group
+az group delete -n $rg
+
+kubectl get po
+
+kubectl delete pod app-web-6f5mq
+
+# Scale up
+kubectl scale replicaset app-web --replicas=5
+
+# Scale down
+kubectl scale replicaset app-web --replicas=2
+
+#Delete replicaset
+kubectl delete replicaset app-web
+
+# Deployment
+kubectl get deployment
+
+kubectl apply -f ./deployment-svc/deployment.yaml
+
+kubectl get po --show-labels
+
+# Deployment up
+kubectl scale deployment deploy-app --replicas=4
+
+# Deployment down
+kubectl scale deployment deploy-app --replicas=2
+
+kubectl describe deployment deploy-app
+
+kubectl delete -f ./deployment-svc/deployment.yaml
+
+#Service
+kubectl apply -f ./deployment-svc/service.yaml
+kubectl get svc
+
+curl http://EXTERNAL-IP
