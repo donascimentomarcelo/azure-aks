@@ -1,0 +1,14 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: role-hml
+  namespace: hml
+rules:
+  - apiGroups:
+      - "*"
+    resources: 
+      - services
+      - pods
+    verbs:
+      - get
+      - list

@@ -1,0 +1,26 @@
+az login
+
+az aks get-credentials -g aks-local-RBAC -n aks-local-RBAC
+
+az aks show -g aks-local-RBAC -n aks-local-RBAC -o yaml
+
+ns=hml
+
+kubectl create namespace $ns
+
+kubectl get namespaces
+
+kubectl apply -f RBAC/ServiceAccount/sysadmin.yaml
+
+kubectl get serviceaccounts -n $ns
+
+kubectl get serviceaccount sysadmin -n $ns -o yaml
+
+kubectl apply -f ./RBAC/Role/role-hml.yaml
+
+kubectl get roles -n hml
+
+# verificar usuario sysadmin tem acesso ao namespace
+kubectl auth can-i list pods --as=system:serviceaccount:$ns:sysadmin.yaml -n $ns
+
+kubectl apply -f role-binding-hml.yaml
