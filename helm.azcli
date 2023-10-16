@@ -1,0 +1,68 @@
+az login --scope https://management.core.windows.net//.default
+
+rg=rg-helm
+local=eastus2
+aks=aks-helm
+sku=Standard_B2s
+
+az group create --resource-group rg-helm -l eastus2
+
+az aks create --resource-group rg-helm --name aks-helm --node-count 1 --node-vm-size Standard_B2s
+
+az aks get-credentials -g rg-helm -n aks-helm
+
+helm repo list
+
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
+helm search repo bitnami
+
+helm repo update
+
+helm repo remove bitnami
+
+kubectl create ns helm
+
+helm install wordpress-helm bitnami/wordpress -n helm
+
+kubectl get secret --namespace helm wordpress-helm -o jsonpath="{.data.wordpress-password}" | base64 -d
+jAOf8kdQgx #senha do wordpress
+
+kubectl get svc -n helm
+
+kubectl get deploy -n helm
+
+kubectl get pods -n helm
+
+curl http://20.96.251.124 #ip experto do wordpress
+
+helm list -n helm
+
+helm uninstall wordpress-helm -n helm
+
+helm repo remove bitnami
+
+kubectl delete ns helm
+kubectl get ns
+
+####################//####################
+
+helm create spring-azure
+
+kubectl create ns spring-azure
+
+helm install spring-azure-chart spring-azure/ --values spring-azure/values.yaml -n spring-azure
+
+helm list -n spring-azure
+
+kubectl get svc -n spring-azure
+
+kubectl get pods -n spring-azure
+
+kubectl describe pod spring-chart-56b98cdc96-7dn46 -n spring-azure
+
+kubectl logs spring-chart-56b98cdc96-7dn46
+
+helm uninstall spring-azure-chart -n spring-azure
+
+az group delete --resource-group rg-helm
