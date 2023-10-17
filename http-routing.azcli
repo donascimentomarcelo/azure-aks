@@ -1,0 +1,17 @@
+az login
+
+az aks show -n http-app-routing -g http-app-routing --query addonProfiles.httpApplicationRouting.config.HTTPApplicationRoutingZoneName
+# URL -> ddefced1dcb542c7b9b8.eastus.aksapp.io
+
+az aks get-credentials -n http-app-routing -g http-app-routing
+
+kubectl apply -f ./http-app-routing/service.yaml
+
+kubectl apply -f ./http-app-routing/deployment.yaml
+
+kubectl apply -f ./http-app-routing/ingress.yaml
+
+kubectl get deployments
+kubectl delete deployment site-deployment -n default
+
+kubectl get sa default -o=jsonpath='{.metadata.namespace}'
